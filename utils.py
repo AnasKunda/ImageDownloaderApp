@@ -98,7 +98,7 @@ def get_filters(server_url, token_name, token_value, site_name, site_id, api_ver
 
     for filter_name, filter_info in filter_dict.items():
         view_data_df = get_view_data_dataframe(conn, view_id=filter_info["get_values_from_view_id"])
-        print(f"VIEW DATA DF COLUMNS: {view_data_df.columns()}")
+        print(f"VIEW DATA DF COLUMNS: {view_data_df.columns}")
         filter_values = view_data_df[filter_info["field_name_in_source_view"]].unique().tolist()
         filter_output[filter_name] = [f'{filter_info["filter_field_name"]}:{f}' for f in filter_values]
     
