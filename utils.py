@@ -59,7 +59,7 @@ def download_zip(zip_buffer, download_filename):
                     <html>
                     <head>
                     <title>Start Auto Download file</title>
-                    <script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+                    <script src="http://code.jquery.com/jquery-3.7.1.min.js"></script>
                     <script>
                     $('<a href="data:text/csv;base64,{b64}" download="{download_filename}">')[0].click()
                     </script>
