@@ -1,2 +1,3 @@
 streamlit
 tableauserverclient
+tableau_api_lib
