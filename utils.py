@@ -75,7 +75,7 @@ def create_zip(_server, _selected_views, names, _filters, filter_names):
     with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as my_zip:
         for v in _selected_views:
             _server.views.populate_image(v, _filters)
-            my_zip.writestr(zinfo_or_arcname=f'{v.name.replace(' ','_')}.png',data=v.image)
+            my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}.png",data=v.image)
     components.html(
         download_zip(zip_buffer.getvalue(), 'tableau_images.zip'),
         height=0,
