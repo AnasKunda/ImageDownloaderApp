@@ -25,6 +25,7 @@ def main():
             site_id = st.secrets["site_id"]
         )
         st.session_state.filter = filters
+        st.session_state.stage = 1
     # authenticate server
     tableau_auth, server = authenticate(
         tokan_name = st.secrets["token_name"], 
@@ -48,8 +49,6 @@ def main():
         default = ["Serve View", "Return View (Heat Map)"]
         view_dict = [{"View":v.name, "Selected":True if v.name in default else False} for v in views]
         
-        
-        
         with st.form(key="Select Views", border=False):
             # selected_views= st.multiselect(
             #     label=f"Views in Dashboard B",
@@ -58,40 +57,41 @@ def main():
             #     format_func = lambda x: x.name,
             #     key="select_view_selectbox"
             # )
-            container1 = st.container()
-            _, col2, _ = container1.columns(3)
+            col_1, col_2 = st.columns([3,2])
             # Filter Selection
-            col2.header("Select Filter")
+            col_2.subheader("Select Filter")
             # col2.subheader("Player Name")
             for filter_name, filter_values in st.session_state.filter.items():
-                selected_name = col2.selectbox(
+                selected_name = col_2.selectbox(
                     label=filter_name,
                     options=filter_values,
                     format_func=lambda x: x.split(':')[-1]
                 )
-            container2 = st.container()
-            _, col_2, _ = container2.columns([1,3,1])
-            views_df = col_2.data_editor(
+            # container2 = st.container()
+            # _, col_2, _ = container2.columns([1,3,1])
+            views_df = col_1.data_editor(
                 data=view_dict,
                 column_config={"Selected":st.column_config.CheckboxColumn()},
                 key="View DataFrame",
                 height=600
             )
             
-            container3 = st.container()
-            _, col__2, _ = container3.columns(3)
-            submit_button = col__2.form_submit_button(label="Download Selected Views", on_click=set_state, args=(1,))
+            col_2.subheader('Download Views')
+            submit_button = col_2.form_submit_button(label="Download Selected Views", on_click=set_state, args=(2,))
             # show_selected_view = st.sidebar.button(label="Show Selected View", on_click=set_state, args=(1,))
-            if submit_button:
-                selected_rows = [view_d["View"] for view_d in views_df if view_d["Selected"]==True]
-                selected_views = [v for v in views if v.name in selected_rows]
-                if selected_name!='None:None':
-                    image_request_object = TSC.ImageRequestOptions()
-                    image_options = image_request_object.vf(*selected_name.split(":"))
-                    image_option_names = selected_name
-                else:
-                    image_options, image_option_names = None, None
-                create_zip(server, selected_views, [v.name for v in selected_views], image_options, image_option_names)
+        if submit_button:
+            selected_rows = [view_d["View"] for view_d in views_df if view_d["Selected"]==True]
+            selected_views = [v for v in views if v.name in selected_rows]
+            if selected_name!='None:None':
+                image_request_object = TSC.ImageRequestOptions()
+                image_options = image_request_object.vf(*selected_name.split(":"))
+                image_option_names = selected_name
+            else:
+                image_options, image_option_names = None, None
+            create_zip(server, selected_views, [v.name for v in selected_views], image_options, image_option_names)
+        # if st.session_state.stage == 2:
+        #     st.subheader('Download Views')
+        #     st.download_button(label='Download Selected Views', data=zip_file, file_name='Tableau_images.zip', mime='application/zip', on_click=set_state, args=(1,))
                 
     
                 # download_selected_views = st.download_button(

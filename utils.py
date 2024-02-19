@@ -59,7 +59,7 @@ def download_zip(zip_buffer, download_filename):
                     <html>
                     <head>
                     <title>Start Auto Download file</title>
-                    <script src="http://code.jquery.com/jquery-3.7.1.min.js"></script>
+                    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
                     <script>
                     $('<a href="data:text/csv;base64,{b64}" download="{download_filename}">')[0].click()
                     </script>
@@ -80,8 +80,9 @@ def create_zip(_server, _selected_views, names, _filters, filter_names):
         download_zip(zip_buffer.getvalue(), 'tableau_images.zip'),
         height=0,
     )
+    # return zip_buffer
     
-def get_filters(server_url, token_name, token_value, site_name, site_id, api_version="3.21"):
+def get_filters(server_url, token_name, token_value, site_name, site_id, api_version="3.22"):
     filter_output = {}
     tableau_server_config = {
             'my_env': {
@@ -98,7 +99,6 @@ def get_filters(server_url, token_name, token_value, site_name, site_id, api_ver
 
     for filter_name, filter_info in filter_dict.items():
         view_data_df = get_view_data_dataframe(conn, view_id=filter_info["get_values_from_view_id"])
-        print(f"VIEW DATA DF COLUMNS: {view_data_df.columns}")
         filter_values = view_data_df[filter_info["field_name_in_source_view"]].unique().tolist()
         filter_output[filter_name] = [f'{filter_info["filter_field_name"]}:{f}' for f in filter_values]
     
