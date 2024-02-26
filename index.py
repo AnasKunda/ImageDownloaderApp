@@ -6,90 +6,117 @@ import io
 import base64
 import tableauserverclient as TSC
 import streamlit.components.v1 as components
+from constants import *
 
 def main():
-    st.set_page_config(page_title="Tableau Image Downloader", layout="centered")
+    st.set_page_config(page_title="Tableau Image Downloader", layout="wide")
     # set up logging
     logging.basicConfig(filename='logs.log', format='%(message)s', level=logging.INFO)
     #
     if 'stage' not in st.session_state:
         st.session_state.stage = 0
-        
     # Get Filters
-    if st.session_state.stage == 0:
-        filters = get_filters(
-            server_url = st.secrets["server_url"],
-            token_name = st.secrets["token_name"], 
-            token_value = st.secrets["token_value"], 
-            site_name = st.secrets["site_name"],
-            site_id = st.secrets["site_id"]
-        )
-        st.session_state.filter = filters
-        st.session_state.stage = 1
-    # authenticate server
-    tableau_auth, server = authenticate(
-        tokan_name = st.secrets["token_name"], 
-        token_value = st.secrets["token_value"], 
-        site_id = st.secrets["site_id"], 
-        server_url = st.secrets["server_url"]
-    )
-    with server.auth.sign_in(tableau_auth):
-        logging.info("Authentication Successful")
-        ### WORKBOOK SELECTOR. RIGHT NOW NOT NEEDED BUT CAN BE USED FOR FUTURE
-        # workbook = st.selectbox(
-        #     label="Select Workbook",
-        #     options=["Dashboard B"],
-        #     index=0
-        # )
-        views = fetchViews(
-            _server=server,
-            workbook_name="Dashboard B"
+    # if st.session_state.stage == 0:
+    #     filters = get_filters(
+    #         server_url = st.secrets["server_url"],
+    #         token_name = st.secrets["token_name"], 
+    #         token_value = st.secrets["token_value"], 
+    #         site_name = st.secrets["site_name"],
+    #         site_id = st.secrets["site_id"]
+    #     )
+    #     st.session_state.filter = filters
+    #     st.session_state.stage = 1
+        # with st.form(key="Select Workbook", border=False):
+        #     workbook = st.selectbox(
+        #         label="Select Workbook",
+        #         options=["Dashboard B", "Hawkeye Succinct with Benchmarks"],
+        #         index=0
+        #     )
+        #     submit_workbook_button = st.form_submit_button(label="Fetch Views", on_click=set_workbook, args=(workbook,1,))
+        
+    workbook = st.selectbox(
+            label="Select Workbook",
+            options=["Dashboard B", "Hawkeye Succinct with Benchmarks"],
+            index=None
         )
         
+    if workbook:
+        # authenticate server
+        tableau_auth, server = authenticate(
+            tokan_name = st.secrets["token_name"], 
+            token_value = st.secrets["token_value"], 
+            site_id = st.secrets["site_id"], 
+            server_url = st.secrets["server_url"]
+        )
+        with server.auth.sign_in(tableau_auth):
+            logging.info("Authentication Successful")
+            views = fetchViews(
+                _server=server,
+                workbook_name=workbook
+            )
+
+        if 'filter' not in st.session_state:
+            filters = get_filters(
+                server_url = st.secrets["server_url"],
+                token_name = st.secrets["token_name"], 
+                token_value = st.secrets["token_value"], 
+                site_name = st.secrets["site_name"],
+                site_id = st.secrets["site_id"]
+            )
+            st.session_state.filter = filters
+    
         default = ["Serve View", "Return View (Heat Map)"]
         view_dict = [{"View":v.name, "Selected":True if v.name in default else False} for v in views]
         
         with st.form(key="Select Views", border=False):
-            # selected_views= st.multiselect(
-            #     label=f"Views in Dashboard B",
-            #     options=views,
-            #     default=views[:3],
-            #     format_func = lambda x: x.name,
-            #     key="select_view_selectbox"
-            # )
-            col_1, col_2 = st.columns([3,2])
+            col1, col2, col3 = st.columns(3)
             # Filter Selection
-            col_2.subheader("Select Filter")
+            col1.subheader("Select Filter")
             # col2.subheader("Player Name")
+            if 'selected_filter_value' not in st.session_state:
+                st.session_state.selected_filter_value = {}
             for filter_name, filter_values in st.session_state.filter.items():
-                selected_name = col_2.selectbox(
+                selected_value = col1.selectbox(
                     label=filter_name,
                     options=filter_values,
                     format_func=lambda x: x.split(':')[-1]
                 )
-            # container2 = st.container()
-            # _, col_2, _ = container2.columns([1,3,1])
-            views_df = col_1.data_editor(
+                st.session_state.selected_filter_value[filter_name] = selected_value
+
+            col2.subheader('Select Views')
+            views_df = col2.data_editor(
                 data=view_dict,
                 column_config={"Selected":st.column_config.CheckboxColumn()},
                 key="View DataFrame",
-                height=600
+                height=600,
+                width=400
             )
-            
-            col_2.subheader('Download Views')
-            submit_button = col_2.form_submit_button(label="Download Selected Views", on_click=set_state, args=(2,))
+
+            with col3:
+                st.subheader('Download Selected Views')
+                submit_button = st.form_submit_button(label="Download")
             # show_selected_view = st.sidebar.button(label="Show Selected View", on_click=set_state, args=(1,))
+      
+            
         if submit_button:
             selected_rows = [view_d["View"] for view_d in views_df if view_d["Selected"]==True]
             selected_views = [v for v in views if v.name in selected_rows]
-            if selected_name!='None:None':
-                image_request_object = TSC.ImageRequestOptions()
-                image_options = image_request_object.vf(*selected_name.split(":"))
-                image_option_names = selected_name
-            else:
-                image_options, image_option_names = None, None
-            create_zip(server, selected_views, [v.name for v in selected_views], image_options, image_option_names)
-        # if st.session_state.stage == 2:
+            # selected_name = st.session_state.selected_filter_value[list(st.session_state.selected_filter_value.keys())[0]]
+            selected_filters, image_option_names = [], []
+            for filter_name, selected_filter_value in st.session_state.selected_filter_value.items():
+                
+                if (filter_dict[filter_name]['is_required']==True) or ((filter_dict[filter_name].is_required==False) and (selected_filter_value != st.session_state.filter[filter_name][0])):
+                    # image_options = image_request_object.vf(*selected_filter_value.split(":"))
+                    selected_filters.extend(selected_filter_value.split(":"))
+                    image_option_names.append(selected_filter_value)
+                else:
+                    continue
+                
+            image_request_object = TSC.ImageRequestOptions()
+            image_options = image_request_object.vf(*selected_filters)
+            create_zip(selected_views, [v.name for v in selected_views], image_options, image_option_names)
+
+
         #     st.subheader('Download Views')
         #     st.download_button(label='Download Selected Views', data=zip_file, file_name='Tableau_images.zip', mime='application/zip', on_click=set_state, args=(1,))
                 

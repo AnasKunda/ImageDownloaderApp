@@ -6,14 +6,7 @@ import base64
 import streamlit.components.v1 as components
 from tableau_api_lib import TableauServerConnection
 from tableau_api_lib.utils.querying import get_views_dataframe, get_view_data_dataframe
-
-filter_dict = {
-    "Player Name": {
-        "get_values_from_view_id": "6b5e8a50-4e87-42c8-8a19-0cd0419f1e97",
-        "field_name_in_source_view": "Player 1 Name",
-        "filter_field_name": "PlayerName"
-    }
-}
+from constants import *
 
 # @st.cache_data
 def authenticate(tokan_name, token_value, site_id, server_url):
@@ -44,7 +37,7 @@ def fetchViews(_server, workbook_name):
         req_options = req_option
     )
     _server.workbooks.populate_views(fetched_workbook[0])
-    _server.workbooks.populate_preview_image(fetched_workbook[0])
+    # _server.workbooks.populate_preview_image(fetched_workbook[0])
     return fetched_workbook[0].views
 
 def download_zip(zip_buffer, download_filename):        
@@ -66,20 +59,29 @@ def download_zip(zip_buffer, download_filename):
                     </head>
                     </html>
                     """
+    
     return dl_link
 
 @st.cache_data
-def create_zip(_server, _selected_views, names, _filters, filter_names):
+def create_zip(_selected_views, names, _filters, filter_names):
     zip_buffer = io.BytesIO()
-        
-    with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as my_zip:
-        for v in _selected_views:
-            _server.views.populate_image(v, _filters)
-            my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}.png",data=v.image)
+    
+    tableau_auth, server = authenticate(
+            tokan_name = st.secrets["token_name"], 
+            token_value = st.secrets["token_value"], 
+            site_id = st.secrets["site_id"], 
+            server_url = st.secrets["server_url"]
+        )
+    with server.auth.sign_in(tableau_auth):
+        with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as my_zip:
+            for v in _selected_views:
+                server.views.populate_image(v, _filters)
+                my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}.png",data=v.image)
     components.html(
         download_zip(zip_buffer.getvalue(), 'tableau_images.zip'),
-        height=0,
+        height=0
     )
+    st.session_state.stage = 2
     # return zip_buffer
     
 def get_filters(server_url, token_name, token_value, site_name, site_id, api_version="3.22"):
@@ -98,8 +100,11 @@ def get_filters(server_url, token_name, token_value, site_name, site_id, api_ver
     conn.sign_in()
 
     for filter_name, filter_info in filter_dict.items():
-        view_data_df = get_view_data_dataframe(conn, view_id=filter_info["get_values_from_view_id"])
-        filter_values = view_data_df[filter_info["field_name_in_source_view"]].unique().tolist()
+        if 'values' in filter_dict[filter_name]:
+            filter_values = filter_info['values']
+        else:
+            view_data_df = get_view_data_dataframe(conn, view_id=filter_info["get_values_from_view_id"])
+            filter_values = view_data_df[filter_info["field_name_in_source_view"]].unique().tolist()
         filter_output[filter_name] = [f'{filter_info["filter_field_name"]}:{f}' for f in filter_values]
     
     conn.sign_out()
@@ -119,6 +124,10 @@ def get_filters(server_url, token_name, token_value, site_name, site_id, api_ver
     
 def set_state(i):
     st.session_state.stage = i
+    
+def set_workbook(workbook, stage):
+    st.session_state.workbook = workbook
+    st.session_state.stage = stage
     
 # def downloaded_successfully(i):
 #     st.success('Image downloaded successfully', icon="✅")
