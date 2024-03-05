@@ -32,13 +32,17 @@ def main():
         #         options=["Dashboard B", "Hawkeye Succinct with Benchmarks"],
         #         index=0
         #     )
-        #     submit_workbook_button = st.form_submit_button(label="Fetch Views", on_click=set_workbook, args=(workbook,1,))
-        
+        #     submit_workbook_button = st.form_submit_button(label="Fetch Views", on_click=set_workbook, args=(workbook,1,)) 
     workbook = st.selectbox(
             label="Select Workbook",
             options=["Dashboard B", "Hawkeye Succinct with Benchmarks"],
             index=None
         )
+    refresh_views_button = st.button(
+        label='Refresh Views',
+        on_click=set_state,
+        args=(1,)
+    )
         
     if workbook:
         # authenticate server
@@ -48,12 +52,22 @@ def main():
             site_id = st.secrets["site_id"], 
             server_url = st.secrets["server_url"]
         )
-        with server.auth.sign_in(tableau_auth):
-            logging.info("Authentication Successful")
-            views = fetchViews(
-                _server=server,
-                workbook_name=workbook
-            )
+        if st.session_state.stage != 1:
+            with server.auth.sign_in(tableau_auth):
+                logging.info("Authentication Successful")
+                views = fetchViews(
+                    _server=server,
+                    workbook_name=workbook
+                )
+        else:
+            fetchViews.clear()
+            with server.auth.sign_in(tableau_auth):
+                logging.info("Authentication Successful")
+                views = fetchViews(
+                    _server=server,
+                    workbook_name=workbook
+                )
+            
 
         if 'filter' not in st.session_state:
             filters = get_filters(

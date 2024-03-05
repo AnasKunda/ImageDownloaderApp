@@ -27,6 +27,18 @@ def authenticate(tokan_name, token_value, site_id, server_url):
     
     return tableau_auth, server
 
+def refresh_views(server,workbook_name):
+    req_option = TSC.RequestOptions()
+    req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
+                                 TSC.RequestOptions.Operator.Equals,
+                                 workbook_name))
+    fetched_workbook, _ = server.workbooks.get(
+        req_options = req_option
+    )
+    server.workbooks.populate_views(fetched_workbook[0])
+    # _server.workbooks.populate_preview_image(fetched_workbook[0])
+    return fetched_workbook[0].views
+
 @st.cache_data
 def fetchViews(_server, workbook_name):
     req_option = TSC.RequestOptions()
