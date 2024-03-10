@@ -7,6 +7,7 @@ import streamlit.components.v1 as components
 from tableau_api_lib import TableauServerConnection
 from tableau_api_lib.utils.querying import get_views_dataframe, get_view_data_dataframe
 from constants import *
+from PIL import Image, ImageFile
 
 # @st.cache_data
 def authenticate(tokan_name, token_value, site_id, server_url):
@@ -88,7 +89,16 @@ def create_zip(_selected_views, names, _filters, filter_names):
         with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as my_zip:
             for v in _selected_views:
                 server.views.populate_image(v, _filters)
-                my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}.png",data=v.image)
+                view_obj = view_name_patterns[v.name]
+                if view_obj:
+                    preprocess = True if view_obj.preprocess else False
+                    for i in range(view_obj.no_of_images):
+                        image_io = crop_image(v.image,view_obj.crop_coords[i],preprocess,paste_coords=view_obj.paste_coords,img2=view_obj.img2)
+                        my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}_{i+1}.png",data=image_io.getvalue())
+                else:
+                    image_io = io.BytesIO(v.image)
+                    my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}.png",data=image_io.getvalue())
+                
     components.html(
         download_zip(zip_buffer.getvalue(), 'tableau_images.zip'),
         height=0
@@ -121,6 +131,18 @@ def get_filters(server_url, token_name, token_value, site_name, site_id, api_ver
     
     conn.sign_out()
     return filter_output
+
+def crop_image(image,crop_coords,preprocess,**kwargs):
+    p = ImageFile.Parser()
+    p.feed(image)
+    image = p.close()
+    if preprocess:
+        image.paste(kwargs['img2'], kwargs['paste_coords'])
+    image = image.crop(crop_coords)
+    image_io = io.BytesIO()
+    image.save(image_io, 'PNG')
+    return image_io
+
 # def populate_view(server, selected_view):
 #     server.views.populate_image(selected_view)
 #     # filename = selected_view.name

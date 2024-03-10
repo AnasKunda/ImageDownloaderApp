@@ -127,8 +127,10 @@ def main():
                     continue
                 
             image_request_object = TSC.ImageRequestOptions()
-            image_options = image_request_object.vf(*selected_filters)
-            create_zip(selected_views, [v.name for v in selected_views], image_options, image_option_names)
+            image_request_object.vf(*selected_filters)
+            # image_request_object.vf('surface','Hard')
+            
+            create_zip(selected_views, [v.name for v in selected_views], image_request_object, image_option_names)
 
 
         #     st.subheader('Download Views')
