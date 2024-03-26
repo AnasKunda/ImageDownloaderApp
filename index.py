@@ -33,8 +33,9 @@ def main():
         #         index=0
         #     )
         #     submit_workbook_button = st.form_submit_button(label="Fetch Views", on_click=set_workbook, args=(workbook,1,)) 
+    st.title("Select Workbook")
     workbook = st.selectbox(
-            label="Select Workbook",
+            label=" ",
             options=["Dashboard B", "Hawkeye Succinct with Benchmarks"],
             index=None
         )
@@ -80,6 +81,9 @@ def main():
             st.session_state.filter = filters
     
         default = ["Serve View", "Return View (Heat Map)"]
+        # image_crop_popover = st.popover("Crop Image")
+        # view_select = image_crop_popover.selectbox(label="Select View",options=views,format_func=lambda x: x.name)
+        
         view_dict = [{"View":v.name, "Selected":True if v.name in default else False} for v in views]
         
         with st.form(key="Select Views", border=False):
@@ -107,30 +111,33 @@ def main():
             )
 
             with col3:
-                st.subheader('Download Selected Views')
-                submit_button = st.form_submit_button(label="Download")
+                st.subheader('Go to Next Page')
+                submit_button = st.form_submit_button(label="Next")
             # show_selected_view = st.sidebar.button(label="Show Selected View", on_click=set_state, args=(1,))
       
             
         if submit_button:
-            selected_rows = [view_d["View"] for view_d in views_df if view_d["Selected"]==True]
-            selected_views = [v for v in views if v.name in selected_rows]
-            # selected_name = st.session_state.selected_filter_value[list(st.session_state.selected_filter_value.keys())[0]]
-            selected_filters, image_option_names = [], []
-            for filter_name, selected_filter_value in st.session_state.selected_filter_value.items():
+            st.session_state.views = views
+            st.session_state.views_df = views_df
+            st.switch_page("pages/iteration_page.py")
+        #     selected_rows = [view_d["View"] for view_d in views_df if view_d["Selected"]==True]
+        #     selected_views = [v for v in views if v.name in selected_rows]
+        #     # selected_name = st.session_state.selected_filter_value[list(st.session_state.selected_filter_value.keys())[0]]
+        #     selected_filters, image_option_names = [], []
+        #     for filter_name, selected_filter_value in st.session_state.selected_filter_value.items():
                 
-                if (filter_dict[filter_name]['is_required']==True) or ((filter_dict[filter_name].is_required==False) and (selected_filter_value != st.session_state.filter[filter_name][0])):
-                    # image_options = image_request_object.vf(*selected_filter_value.split(":"))
-                    selected_filters.extend(selected_filter_value.split(":"))
-                    image_option_names.append(selected_filter_value)
-                else:
-                    continue
+        #         if (filter_dict[filter_name]['is_required']==True) or ((filter_dict[filter_name].is_required==False) and (selected_filter_value != st.session_state.filter[filter_name][0])):
+        #             # image_options = image_request_object.vf(*selected_filter_value.split(":"))
+        #             selected_filters.extend(selected_filter_value.split(":"))
+        #             image_option_names.append(selected_filter_value)
+        #         else:
+        #             continue
                 
-            image_request_object = TSC.ImageRequestOptions()
-            image_request_object.vf(*selected_filters)
-            # image_request_object.vf('surface','Hard')
+        #     image_request_object = TSC.ImageRequestOptions()
+        #     image_request_object.vf(*selected_filters)
+        #     # image_request_object.vf('surface','Hard')
             
-            create_zip(selected_views, [v.name for v in selected_views], image_request_object, image_option_names)
+        #     create_zip(selected_views, [v.name for v in selected_views], image_request_object, image_option_names)
 
 
         #     st.subheader('Download Views')

@@ -75,8 +75,8 @@ def download_zip(zip_buffer, download_filename):
     
     return dl_link
 
-@st.cache_data
-def create_zip(_selected_views, names, _filters, filter_names):
+# @st.cache_data
+def create_zip(final_views, filters):
     zip_buffer = io.BytesIO()
     
     tableau_auth, server = authenticate(
@@ -87,14 +87,15 @@ def create_zip(_selected_views, names, _filters, filter_names):
         )
     with server.auth.sign_in(tableau_auth):
         with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as my_zip:
-            for v in _selected_views:
-                server.views.populate_image(v, _filters)
+            for i,v in final_views.items():
+                server.views.populate_image(v, filters[i])
+                filter_name = '__'.join(['_'.join(filter_pair).replace(" ","") for filter_pair in filters[i].view_filters])
                 view_obj = view_name_patterns[v.name]
                 if view_obj:
                     preprocess = True if view_obj.preprocess else False
-                    for i in range(view_obj.no_of_images):
-                        image_io = crop_image(v.image,view_obj.crop_coords[i],preprocess,paste_coords=view_obj.paste_coords,img2=view_obj.img2)
-                        my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}_{i+1}.png",data=image_io.getvalue())
+                    for j in range(view_obj.no_of_images):
+                        image_io = crop_image(v.image,view_obj.crop_coords[j],preprocess,paste_coords=view_obj.paste_coords,img2=view_obj.img2)
+                        my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}__{filter_name}__crop_{j+1}.png",data=image_io.getvalue())
                 else:
                     image_io = io.BytesIO(v.image)
                     my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}.png",data=image_io.getvalue())
