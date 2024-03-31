@@ -7,7 +7,20 @@ filter_dict = {
         "get_values_from_view_id": "6b5e8a50-4e87-42c8-8a19-0cd0419f1e97",
         "field_name_in_source_view": "Player 1 Name",
         "filter_field_name": "PlayerName",
-        "is_required": True
+        "is_required": True,
+        "has_default": True
+    },
+    "Surface": {
+        "values": ["Clay","Grass","Hard"],
+        "is_required": False,
+        "filter_field_name": "surface",
+        "has_default": False
+    },
+    "Opponent Hand": {
+        "values": ["Left", "Right"],
+        "is_required": False,
+        "filter_field_name": "opponent_handedness",
+        "has_default": False
     }
 }
 
@@ -18,9 +31,6 @@ iteration_filter_dict = {
     "Is Inside Baseline": {
         "values":["TRUE","FALSE"]
     },
-    "Select Surface": {
-        "values":["Clay","Grass","Hard"]
-    },
     "Forehand hit from Backhand Corner": {
         "values":["True","False"]
     },
@@ -29,6 +39,9 @@ iteration_filter_dict = {
     },
     "Which Serve": {
         "values":["First Serve","Second Serve"]
+    },
+    "Hit from Mid section?": {
+        "values":["TRUE","FALSE"]
     }
 }
 
@@ -56,8 +69,7 @@ class TableauView:
         
 serve_view_obj = TableauView(
     no_of_images=3,
-    crop_coords=[(0,0,774,746),(0,746,1006,886),(773,7,1022,696)],
-    iteration_filters = {"Select Surface":"surface"}
+    crop_coords=[(0,0,774,746),(0,746,1006,886),(773,7,1022,696)]
 )
 
 return_view_obj = TableauView(
@@ -80,7 +92,8 @@ ground_stroke_bar_chart_obj = TableauView(
 
 ground_stroke_with_kpi_card_obj = TableauView(
     no_of_images=2,
-    crop_coords=[(0, 52, 1467, 825), (677, 0, 1467, 52)]
+    crop_coords=[(0, 52, 1467, 825), (0, 0, 1467, 52)],
+    iteration_filters = {"Hit from Mid section?":"Hit from Mid section?"}
 )
 
 ground_stroke_with_kpi_card_2_obj = TableauView(

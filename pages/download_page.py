@@ -28,7 +28,7 @@ with st.form(key="download_page_form", border=False):
                 filter_name = list(view_obj.iteration_filters.keys())[i-1]
                 cols[i].markdown(f"**{filter_name}**")
                 for j in range(1, st.session_state.iterations[view.name]+1):
-                    cols[i].selectbox(label=" ",key=f"{view.name}_{filter_name}_iter_{j}", options=iteration_filter_dict[filter_name]["values"], index=None, format_func=lambda x:"(NULL)" if x == False else x)
+                    cols[i].selectbox(label=" ",key=f"{view.name}_{filter_name}_iter_{j}", options=iteration_filter_dict[filter_name]["values"], index=None, format_func=lambda x:"(NULL)" if x == False else x, placeholder="All")
                     
         else:
             cols[1].markdown("**No Additional Filters**")
@@ -45,10 +45,8 @@ if download_button:
 
         # COMMON FILTERS
         for filter_name, selected_filter_value in st.session_state.selected_filter_value.items():
-            if (filter_dict[filter_name]['is_required']==True) or ((filter_dict[filter_name].is_required==False) and (selected_filter_value != st.session_state.filter[filter_name][0])):
+            if selected_filter_value is not None:
                 common_filters.append(selected_filter_value.split(":"))
-            else:
-                continue
         
         if view_obj.iteration_filters: # If a view has iteration filters......
             for i in range(1, st.session_state.iterations[view.name]+1): # FOR EACH ITERATION...... 

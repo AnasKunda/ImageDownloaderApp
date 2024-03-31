@@ -78,6 +78,7 @@ def main():
                 site_name = st.secrets["site_name"],
                 site_id = st.secrets["site_id"]
             )
+            
             st.session_state.filter = filters
     
         default = ["Serve View", "Return View (Heat Map)"]
@@ -94,10 +95,13 @@ def main():
             if 'selected_filter_value' not in st.session_state:
                 st.session_state.selected_filter_value = {}
             for filter_name, filter_values in st.session_state.filter.items():
+                default = 0 if filter_dict[filter_name]["has_default"] else None
                 selected_value = col1.selectbox(
                     label=filter_name,
                     options=filter_values,
-                    format_func=lambda x: x.split(':')[-1]
+                    format_func=lambda x: x.split(':')[-1],
+                    index=default,
+                    placeholder="All"
                 )
                 st.session_state.selected_filter_value[filter_name] = selected_value
 
