@@ -1,7 +1,7 @@
 import streamlit as st
 from constants import view_name_patterns, filter_dict, iteration_filter_dict
 import tableauserverclient as TSC
-from utils import create_zip
+from utils import create_zip, save_pref
 
 st.title("Set Filters & Download")
 
@@ -9,6 +9,7 @@ selected_rows = [view_d["View"] for view_d in st.session_state.views_df if view_
 selected_views = [v for v in st.session_state.views if v.name in selected_rows]
 final_views = {}
 image_request_objects = {}
+iteration_details = {}
 
 with st.form(key="download_page_form", border=False):
     for view in selected_views:
@@ -35,13 +36,14 @@ with st.form(key="download_page_form", border=False):
 
         # iter_options = [i for i in range(1,max(view_obj.iterations.keys())+1)] if view_obj.iterations else [1]
         # iter = container.selectbox(label="No. of Iterations", key=f'{view.name}_iterations',options=iter_options)
-  
+    pref_name = st.text_input(label="Preference Name", value=None, placeholder="Save Preference by Name")
     download_button = st.form_submit_button(label="Download Views")
     
 if download_button:
     for view in selected_views:
         view_obj = view_name_patterns[view.name]
         common_filters = []
+        iteration_details[view.name] = {}
 
         # COMMON FILTERS
         for filter_name, selected_filter_value in st.session_state.selected_filter_value.items():
@@ -60,13 +62,17 @@ if download_button:
                     current_iteration_filters.append(f"{filter_field},{filter_value}")
                 if common_filters: # add common filters
                     for cf in common_filters:
-                        print(f"Filter: {cf[0]},{cf[1]}")
-                        image_request_object.vf(cf[0],cf[1])
+                        if view_obj.exclude_common_filters and cf[0] in view_obj.exclude_common_filters:
+                            continue
+                        else:
+                            print(f"Filter: {cf[0]},{cf[1]}")
+                            image_request_object.vf(cf[0],cf[1])
                 for i_f in current_iteration_filters: # add iteration-specific filters
                     print(f"Filter: {i_f}")
                     image_request_object.vf(i_f.split(",")[0],i_f.split(",")[1])
                     
                 final_views[len(final_views)+1] = view
+                iteration_details[view.name][i] = current_iteration_filters
                 image_request_objects[len(image_request_objects)+1] = image_request_object
                     
         else: # View doesn't have iterations...only add common filters if needed...
@@ -77,11 +83,17 @@ if download_button:
                     image_request_object.vf(cf[0],cf[1])
                     
                 final_views[len(final_views)+1] = view
+                iteration_details[view.name][1] = []
                 image_request_objects[len(image_request_objects)+1] = image_request_object
-                
+ 
+    if pref_name:
+        if 'iteration_details' not in st.session_state:
+            st.session_state.iteration_details = iteration_details
+            print(f"iteration_details: {iteration_details}") 
+        print(f"st.session_state.iterations: {st.session_state.iterations}")
+        save_pref(pref_name)
     create_zip(final_views, image_request_objects)
     
-
 back_button = st.button(label="Go Back", key="back_button")
 home_button = st.button(label="Go Home", key="home_button")
 

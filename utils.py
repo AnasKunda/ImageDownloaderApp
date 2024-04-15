@@ -8,6 +8,8 @@ from tableau_api_lib import TableauServerConnection
 from tableau_api_lib.utils.querying import get_views_dataframe, get_view_data_dataframe
 from constants import *
 from PIL import Image, ImageFile
+from pathlib import Path
+import pandas as pd
 
 # @st.cache_data
 def authenticate(tokan_name, token_value, site_id, server_url):
@@ -164,6 +166,90 @@ def set_workbook(workbook, stage):
     st.session_state.workbook = workbook
     st.session_state.stage = stage
     
+def save_pref(pref_name):
+    pref_file = Path("preferences.pkl")
+    
+    views = [view_d["View"] for view_d in st.session_state.views_df if view_d["Selected"]==True]
+    common_filters = st.session_state.selected_filter_value
+    iterations = st.session_state.iterations
+    iteration_details = st.session_state.iteration_details
+
+    try:
+        _ = pref_file.resolve(strict=True)
+    except FileNotFoundError:
+        # pickle doesn't exist...create new dataframe and pickle
+        # df = pd.DataFrame(data=[pref_name, views, common_filters, iterations, iteration_details],\
+        #                   columns=['pref_name','views','common_filters','iterations','iteration_details'])
+        df = pd.DataFrame.from_dict(
+            data = {'1':[pref_name, views, common_filters, iterations, iteration_details]},\
+            columns=['pref_name','views','common_filters','iterations','iteration_details'],\
+            orient='index'
+        )
+        df.to_pickle('preferences.pkl')
+    else:
+        # pickle exists...load pickle
+        df = pd.read_pickle('preferences.pkl')
+        new_row = [pref_name, views, common_filters, iterations, iteration_details]
+        df.loc[len(df)] = new_row
+        df.to_pickle('preferences.pkl')
+        
+    print("Preference saved...")
+    
+def load_pref():
+    pref_file = Path("preferences.pkl")
+    
+    try:
+        _ = pref_file.resolve(strict=True)
+        
+    except FileNotFoundError:
+        return []
+    
+    else:
+        pref_names = pd.read_pickle('preferences.pkl')['pref_name'].to_list()
+        return pref_names
+        
+def create_zip_from_pref(pref_name):
+    pref_row = pd.read_pickle('preferences.pkl')
+    pref_row = pref_row.loc[pref_row.pref_name == pref_name]
+    common_filters = pref_row.common_filters.values[0]
+    print(f"common_filters: {common_filters}")
+    iterations = pref_row.iterations.values[0]
+    iteration_details = pref_row.iteration_details.values[0]
+    final_views = {}
+    image_request_objects = {}
+    
+    view_names = pref_row.views.values[0]
+    views = [v for v in st.session_state.views if v.name in view_names]
+    for v in views:
+        view_obj = view_name_patterns[v.name]
+        v_iteration = iterations[v.name]
+        view_iteration_filters = iteration_details[v.name]
+        print(f"view_iteration_filters: {view_iteration_filters}")
+        
+        for i in range(1,v_iteration+1):
+            image_request_object = TSC.ImageRequestOptions()
+            if i in view_iteration_filters:
+                current_iteration_filters = view_iteration_filters[i]
+            
+            # COMMON FILTERS
+            for _,cf in common_filters.items():
+                if view_obj.exclude_common_filters and cf.split(':')[0] in view_obj.exclude_common_filters:
+                    continue
+                elif cf is not None:
+                    print(f"Filter: {cf.split(':')[0]},{cf.split(':')[1]}")
+                    image_request_object.vf(cf.split(':')[0],cf.split(':')[1])  
+                
+            # ITERATION SPECIFIC FILTERS
+            if current_iteration_filters:
+                for i_f in current_iteration_filters: # add iteration-specific filters
+                    print(f"Filter: {i_f}")
+                    image_request_object.vf(i_f.split(",")[0],i_f.split(",")[1]) 
+                
+            final_views[len(final_views)+1] = v 
+            image_request_objects[len(image_request_objects)+1] = image_request_object
+            
+    create_zip(final_views, image_request_objects)
+               
 # def downloaded_successfully(i):
 #     st.success('Image downloaded successfully', icon="✅")
 #     set_state(i)

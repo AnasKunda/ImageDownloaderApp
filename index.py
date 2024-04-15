@@ -69,7 +69,6 @@ def main():
                     workbook_name=workbook
                 )
             
-
         if 'filter' not in st.session_state:
             filters = get_filters(
                 server_url = st.secrets["server_url"],
@@ -115,6 +114,9 @@ def main():
             )
 
             with col3:
+                st.subheader('Load from Preferences')
+                pref_names = load_pref()
+                preference = st.selectbox(label="", key="pref_select", options=pref_names, index=None)
                 st.subheader('Go to Next Page')
                 submit_button = st.form_submit_button(label="Next")
             # show_selected_view = st.sidebar.button(label="Show Selected View", on_click=set_state, args=(1,))
@@ -123,7 +125,10 @@ def main():
         if submit_button:
             st.session_state.views = views
             st.session_state.views_df = views_df
-            st.switch_page("pages/iteration_page.py")
+            if not preference:
+                st.switch_page("pages/iteration_page.py")
+            else:
+                create_zip_from_pref(preference)
         #     selected_rows = [view_d["View"] for view_d in views_df if view_d["Selected"]==True]
         #     selected_views = [v for v in views if v.name in selected_rows]
         #     # selected_name = st.session_state.selected_filter_value[list(st.session_state.selected_filter_value.keys())[0]]

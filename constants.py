@@ -66,6 +66,7 @@ class TableauView:
         self.img2 = kwargs.get('img2',None)
         self.paste_coords = kwargs.get('paste_coordinate', None)
         self.iteration_filters = kwargs.get('iteration_filters', None)
+        self.exclude_common_filters = kwargs.get('exclude_common_filters', None)
         
 serve_view_obj = TableauView(
     no_of_images=3,
@@ -101,7 +102,8 @@ ground_stroke_with_kpi_card_2_obj = TableauView(
     crop_coords=[(0, 52, 1468, 826), (0, 0, 1468, 52)],
     iteration_filters = {"Shot Selection":"Stroke - Include VolleyOverheads",\
                         "Is Inside Baseline":"Is Inside Baseline?",\
-                        "Forehand hit from Backhand Corner":"Forehand hit from Backhand Corner"}
+                        "Forehand hit from Backhand Corner":"Forehand hit from Backhand Corner"},
+    exclude_common_filters = ["surface"]
 )
 
 winners_and_errors_heatmap_obj = TableauView(

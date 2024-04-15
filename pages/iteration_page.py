@@ -7,6 +7,7 @@ st.title("Select Iterations")
 
 selected_rows = [view_d["View"] for view_d in st.session_state.views_df if view_d["Selected"]==True]
 selected_views = [v for v in st.session_state.views if v.name in selected_rows]
+print(f"selected_views: {selected_views}")
 if 'iterations' not in st.session_state:
     st.session_state.iterations = {}
 
