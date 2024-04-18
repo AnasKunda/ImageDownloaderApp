@@ -73,9 +73,19 @@ serve_view_obj = TableauView(
     crop_coords=[(0,0,774,746),(0,746,1006,886),(773,7,1022,696)]
 )
 
+serve_view_heat_map_obj = TableauView(
+    no_of_images=3,
+    crop_coords=[(0,0,773,741),(0,750,1023,899),(774,0,1023,741)]
+)
+
 return_view_obj = TableauView(
     no_of_images=3,
     crop_coords=[(0,0,774,746),(0,746,1006,886),(773,7,1022,696)]
+)
+
+return_view_heat_map_obj = TableauView(
+    no_of_images=3,
+    crop_coords=[(0,0,772,772),(0,773,772,899),(772,0,1024,772)]
 )
 
 ground_stroke_view_obj = TableauView(
@@ -139,6 +149,12 @@ ppc_npc_obj = TableauView(
     crop_coords=[(0,70,1500,754),(0,0,1500,70)]
 )
 
+fh_backhand_detailed_tables_obj = TableauView(
+    no_of_images=2,
+    crop_coords=[(0,60,1468,826),(0,0,1468,60)],
+    exclude_common_filters = ["surface", "opponent_handedness"]
+)
+
 # x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=
 
 class RegexDict(dict):
@@ -154,10 +170,10 @@ class RegexDict(dict):
 view_name_patterns = RegexDict()
 view_name_patterns[r"(?i)serve view \(first"]  = serve_view_obj
 view_name_patterns[r"(?i)serve view \(second"]  = serve_view_obj
+view_name_patterns[r"(?i)serve view \(heat map\)"] = serve_view_heat_map_obj
 view_name_patterns[r"(?i)serve view"]  = serve_view_obj
-view_name_patterns[r"(?i)serve heat map view"] = serve_view_obj
+view_name_patterns[r"(?i)return view \(heat map\)"] = return_view_heat_map_obj
 view_name_patterns[r"(?i)return view"] = return_view_obj
-view_name_patterns[r"(?i)return view \(heat map\)"] = return_view_obj
 view_name_patterns[r"(?i)ground stroke full court view"] = ground_stroke_view_obj
 view_name_patterns[r"(?i)ground stroke heat map view \(.*"] = ground_stroke_view_obj
 view_name_patterns[r"(?i)ground strokes with shot type bar chart.*"] = ground_stroke_bar_chart_obj
@@ -169,3 +185,4 @@ view_name_patterns[r"(?i)return \+1.*"] = return_plus_1_obj
 view_name_patterns[r"(?i)game scenarios.*"] = game_scenarios_obj
 view_name_patterns[r"(?i)stroke speed & spin over time.*"] = stroke_speed_and_spin_obj
 view_name_patterns[r"(?i)ppc-npc.*"] = ppc_npc_obj
+view_name_patterns[r"(?i)fh and backhand detailed tables.*"] = fh_backhand_detailed_tables_obj

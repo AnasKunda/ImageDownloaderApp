@@ -9,7 +9,7 @@ import streamlit.components.v1 as components
 from constants import *
 
 def main():
-    st.set_page_config(page_title="Tableau Image Downloader", layout="wide")
+    st.set_page_config(page_title="Select Views", layout="wide")
     # set up logging
     logging.basicConfig(filename='logs.log', format='%(message)s', level=logging.INFO)
     #

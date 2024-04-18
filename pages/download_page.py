@@ -3,7 +3,7 @@ from constants import view_name_patterns, filter_dict, iteration_filter_dict
 import tableauserverclient as TSC
 from utils import create_zip, save_pref
 
-st.set_page_config(page_title="Download Images")
+st.set_page_config(page_title="Download Images", layout="wide")
 st.title("Set Filters & Download")
 
 selected_rows = [view_d["View"] for view_d in st.session_state.views_df if view_d["Selected"]==True]
@@ -68,11 +68,10 @@ if download_button:
                             continue
                         else:
                             print(f"Filter: {cf[0]},{cf[1]}")
-                            image_request_object.vf(cf[0],cf[1])
+                            image_request_object.vf(cf[0],cf[1])  
                 for i_f in current_iteration_filters: # add iteration-specific filters
                     print(f"Filter: {i_f}")
                     image_request_object.vf(i_f.split(",")[0],i_f.split(",")[1])
-                    
                 final_views[len(final_views)+1] = view
                 iteration_details[view.name][i] = current_iteration_filters
                 image_request_objects[len(image_request_objects)+1] = image_request_object
@@ -81,9 +80,12 @@ if download_button:
             image_request_object = TSC.ImageRequestOptions()
             if common_filters:
                 for cf in common_filters:
-                    print(f"Filter: {cf[0]},{cf[1]}")
-                    image_request_object.vf(cf[0],cf[1])
-                    
+                    if view_obj.exclude_common_filters and cf[0] in view_obj.exclude_common_filters:
+                        continue
+                    else:
+                        print(f"Filter: {cf[0]},{cf[1]}")
+                        image_request_object.vf(cf[0],cf[1])
+                                            
                 final_views[len(final_views)+1] = view
                 iteration_details[view.name][1] = []
                 image_request_objects[len(image_request_objects)+1] = image_request_object
@@ -103,6 +105,6 @@ if back_button:
     st.switch_page("./pages/iteration_page.py")
     
 if home_button:
-    st.switch_page("index.py")
+    st.switch_page("./pages/views_page.py")
         
     

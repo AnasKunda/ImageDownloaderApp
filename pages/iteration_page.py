@@ -3,12 +3,12 @@ from constants import view_name_patterns, filter_dict
 import tableauserverclient as TSC
 from utils import create_zip
 
-st.set_page_config(page_title="Set Iterations")
+st.set_page_config(page_title="Set Iterations", layout="wide")
 st.title("Select Iterations")
 
 selected_rows = [view_d["View"] for view_d in st.session_state.views_df if view_d["Selected"]==True]
 selected_views = [v for v in st.session_state.views if v.name in selected_rows]
-print(f"selected_views: {selected_views}")
+
 if 'iterations' not in st.session_state:
     st.session_state.iterations = {}
 
@@ -65,7 +65,7 @@ if next_button:
     
     
 if home_button:
-    st.switch_page("index.py")  
+    st.switch_page("./pages/views_page.py")  
         
         
         #     selected_filters, image_option_names = [], []
