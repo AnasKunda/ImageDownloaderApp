@@ -170,7 +170,7 @@ def set_workbook(workbook, stage):
     st.session_state.workbook = workbook
     st.session_state.stage = stage
     
-def save_pref(pref_name):
+def save_pref(pref_name, include_filter_image):
     pref_file = Path("preferences.pkl")
     
     views = [view_d["View"] for view_d in st.session_state.views_df if view_d["Selected"]==True]
@@ -185,15 +185,15 @@ def save_pref(pref_name):
         # df = pd.DataFrame(data=[pref_name, views, common_filters, iterations, iteration_details],\
         #                   columns=['pref_name','views','common_filters','iterations','iteration_details'])
         df = pd.DataFrame.from_dict(
-            data = {'1':[pref_name, views, common_filters, iterations, iteration_details]},\
-            columns=['pref_name','views','common_filters','iterations','iteration_details'],\
+            data = {'1':[pref_name, views, common_filters, iterations, iteration_details, include_filter_image]},\
+            columns=['pref_name','views','common_filters','iterations','iteration_details', 'include_filter_image'],\
             orient='index'
         )
         df.to_pickle('preferences.pkl')
     else:
         # pickle exists...load pickle
         df = pd.read_pickle('preferences.pkl')
-        new_row = [pref_name, views, common_filters, iterations, iteration_details]
+        new_row = [pref_name, views, common_filters, iterations, iteration_details, include_filter_image]
         df.loc[len(df)] = new_row
         df.to_pickle('preferences.pkl')
         
@@ -219,6 +219,7 @@ def create_zip_from_pref(pref_name):
     print(f"common_filters: {common_filters}")
     iterations = pref_row.iterations.values[0]
     iteration_details = pref_row.iteration_details.values[0]
+    include_filter_image = pref_row.include_filter_image.values[0]
     final_views = {}
     image_request_objects = {}
     
@@ -252,7 +253,7 @@ def create_zip_from_pref(pref_name):
             final_views[len(final_views)+1] = v 
             image_request_objects[len(image_request_objects)+1] = image_request_object
             
-    create_zip(final_views, image_request_objects)
+    create_zip(final_views, image_request_objects, include_filter_image)
                
 # def downloaded_successfully(i):
 #     st.success('Image downloaded successfully', icon="✅")

@@ -95,7 +95,7 @@ if download_button:
             st.session_state.iteration_details = iteration_details
             print(f"iteration_details: {iteration_details}") 
         print(f"st.session_state.iterations: {st.session_state.iterations}")
-        save_pref(pref_name)
+        save_pref(pref_name, include_filter_image)
     create_zip(final_views, image_request_objects, include_filter_image)
     
 back_button = st.button(label="Go Back", key="back_button")
