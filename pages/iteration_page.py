@@ -3,6 +3,7 @@ from constants import view_name_patterns, filter_dict
 import tableauserverclient as TSC
 from utils import create_zip
 
+st.set_page_config(page_title="Set Iterations")
 st.title("Select Iterations")
 
 selected_rows = [view_d["View"] for view_d in st.session_state.views_df if view_d["Selected"]==True]

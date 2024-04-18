@@ -134,7 +134,10 @@ stroke_speed_and_spin_obj = TableauView(
     crop_coords=[(0, 82, 1368, 702),(0, 0, 1368, 82)]
 )
 
-# 0, 82, 1368, 702
+ppc_npc_obj = TableauView(
+    no_of_images=2,
+    crop_coords=[(0,70,1500,754),(0,0,1500,70)]
+)
 
 # x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=
 
@@ -165,3 +168,4 @@ view_name_patterns[r"(?i)serve \+1.*"] = serve_plus_1_obj
 view_name_patterns[r"(?i)return \+1.*"] = return_plus_1_obj
 view_name_patterns[r"(?i)game scenarios.*"] = game_scenarios_obj
 view_name_patterns[r"(?i)stroke speed & spin over time.*"] = stroke_speed_and_spin_obj
+view_name_patterns[r"(?i)ppc-npc.*"] = ppc_npc_obj

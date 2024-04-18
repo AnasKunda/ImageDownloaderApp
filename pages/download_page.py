@@ -3,6 +3,7 @@ from constants import view_name_patterns, filter_dict, iteration_filter_dict
 import tableauserverclient as TSC
 from utils import create_zip, save_pref
 
+st.set_page_config(page_title="Download Images")
 st.title("Set Filters & Download")
 
 selected_rows = [view_d["View"] for view_d in st.session_state.views_df if view_d["Selected"]==True]
@@ -37,6 +38,7 @@ with st.form(key="download_page_form", border=False):
         # iter_options = [i for i in range(1,max(view_obj.iterations.keys())+1)] if view_obj.iterations else [1]
         # iter = container.selectbox(label="No. of Iterations", key=f'{view.name}_iterations',options=iter_options)
     pref_name = st.text_input(label="Preference Name", value=None, placeholder="Save Preference by Name")
+    include_filter_image = st.checkbox(label="Include Filter Image")
     download_button = st.form_submit_button(label="Download Views")
     
 if download_button:
@@ -92,7 +94,7 @@ if download_button:
             print(f"iteration_details: {iteration_details}") 
         print(f"st.session_state.iterations: {st.session_state.iterations}")
         save_pref(pref_name)
-    create_zip(final_views, image_request_objects)
+    create_zip(final_views, image_request_objects, include_filter_image)
     
 back_button = st.button(label="Go Back", key="back_button")
 home_button = st.button(label="Go Home", key="home_button")

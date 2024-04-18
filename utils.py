@@ -78,7 +78,7 @@ def download_zip(zip_buffer, download_filename):
     return dl_link
 
 # @st.cache_data
-def create_zip(final_views, filters):
+def create_zip(final_views, filters, include_filter_image):
     zip_buffer = io.BytesIO()
     
     tableau_auth, server = authenticate(
@@ -95,7 +95,11 @@ def create_zip(final_views, filters):
                 view_obj = view_name_patterns[v.name]
                 if view_obj:
                     preprocess = True if view_obj.preprocess else False
-                    for j in range(view_obj.no_of_images):
+                    if include_filter_image:
+                        no_of_images = view_obj.no_of_images
+                    else:
+                        no_of_images = view_obj.no_of_images - 1
+                    for j in range(no_of_images):
                         image_io = crop_image(v.image,view_obj.crop_coords[j],preprocess,paste_coords=view_obj.paste_coords,img2=view_obj.img2)
                         my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}__{filter_name}__crop_{j+1}.png",data=image_io.getvalue())
                 else:
