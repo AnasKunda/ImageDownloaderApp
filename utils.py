@@ -238,11 +238,12 @@ def create_zip_from_pref(pref_name):
             
             # COMMON FILTERS
             for _,cf in common_filters.items():
-                if view_obj.exclude_common_filters and cf.split(':')[0] in view_obj.exclude_common_filters:
-                    continue
-                elif cf is not None:
-                    print(f"Filter: {cf.split(':')[0]},{cf.split(':')[1]}")
-                    image_request_object.vf(cf.split(':')[0],cf.split(':')[1])  
+                if cf is not None:
+                    if view_obj.exclude_common_filters and cf.split(':')[0] in view_obj.exclude_common_filters:
+                        continue
+                    else:
+                        print(f"Filter: {cf.split(':')[0]},{cf.split(':')[1]}")
+                        image_request_object.vf(cf.split(':')[0],cf.split(':')[1])  
                 
             # ITERATION SPECIFIC FILTERS
             if current_iteration_filters:
