@@ -18,6 +18,6 @@ login = c2_2.button(label="Login")
 
 if login:
     if pss == st.secrets.password:
-        st.switch_page("pages/index.py")
+        st.switch_page("pages/views_page.py")
     else:
         st.error("Incorrect password, try again...")
