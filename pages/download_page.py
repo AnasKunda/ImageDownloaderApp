@@ -89,11 +89,11 @@ if download_button:
                 final_views[len(final_views)+1] = view
                 iteration_details[view.name][1] = []
                 image_request_objects[len(image_request_objects)+1] = image_request_object
+        print(f"view: {view.name}")
+        print(f"iteration details: {iteration_details}")
  
     if pref_name:
-        if 'iteration_details' not in st.session_state:
-            st.session_state.iteration_details = iteration_details
-            print(f"iteration_details: {iteration_details}") 
+        st.session_state.iteration_details = iteration_details
         print(f"st.session_state.iterations: {st.session_state.iterations}")
         save_pref(pref_name, include_filter_image)
     create_zip(final_views, image_request_objects, include_filter_image)
