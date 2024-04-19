@@ -78,7 +78,7 @@ def download_zip(zip_buffer, download_filename):
     return dl_link
 
 # @st.cache_data
-def create_zip(final_views, filters, include_filter_image):
+def create_zip(final_views, filters, include_filter_image, filename):
     zip_buffer = io.BytesIO()
     
     tableau_auth, server = authenticate(
@@ -107,7 +107,7 @@ def create_zip(final_views, filters, include_filter_image):
                     my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}.png",data=image_io.getvalue())
                 
     components.html(
-        download_zip(zip_buffer.getvalue(), 'tableau_images.zip'),
+        download_zip(zip_buffer.getvalue(), f'{filename}.zip'),
         height=0
     )
     st.session_state.stage = 2
@@ -253,8 +253,12 @@ def create_zip_from_pref(pref_name):
                 
             final_views[len(final_views)+1] = v 
             image_request_objects[len(image_request_objects)+1] = image_request_object
-            
-    create_zip(final_views, image_request_objects, include_filter_image)
+    filename = "" 
+    for i,v in common_filters.items():
+        if v is not None:
+            filename += v.split(":")[1].replace(" ","_")+"__"
+    filename = filename[:-2]
+    create_zip(final_views, image_request_objects, include_filter_image, filename)
                
 # def downloaded_successfully(i):
 #     st.success('Image downloaded successfully', icon="✅")
