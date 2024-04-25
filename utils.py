@@ -215,7 +215,8 @@ def load_pref():
 def create_zip_from_pref(pref_name):
     pref_row = pd.read_pickle('preferences.pkl')
     pref_row = pref_row.loc[pref_row.pref_name == pref_name]
-    common_filters = pref_row.common_filters.values[0]
+    # common_filters = pref_row.common_filters.values[0]
+    common_filters = st.session_state.selected_filter_value
     print(f"common_filters: {common_filters}")
     iterations = pref_row.iterations.values[0]
     iteration_details = pref_row.iteration_details.values[0]
