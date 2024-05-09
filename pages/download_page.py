@@ -13,14 +13,15 @@ final_views = {}
 image_request_objects = {}
 iteration_details = {}
 
+#view_obj is the TableauView object created in constants.py file.
+#This view contains info like crop setting, applicable common filters and view-specific filters. 
+
+#view_name_patterns is a dictionary which takes the view's name, and returns the appropriate
+#TableauView object.
+
+
 with st.form(key="download_page_form", border=False):
     for view in selected_views:
-        """ view_obj is the TableauView object created in constants.py file.
-            This view contains info like crop setting, applicable common filters and view-specific filters. 
-            
-            view_name_patterns is a dictionary which takes the view's name, and returns the appropriate
-            TableauView object.
-        """
         view_obj = view_name_patterns[view.name]
         container = st.container()
         container.subheader(f"{view.name}")
