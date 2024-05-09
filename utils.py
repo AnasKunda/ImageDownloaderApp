@@ -11,7 +11,6 @@ from PIL import Image, ImageFile
 from pathlib import Path
 import pandas as pd
 
-# @st.cache_data
 def authenticate(tokan_name, token_value, site_id, server_url):
     """Connect to Tableau server using Personal Access Token
 
@@ -30,20 +29,29 @@ def authenticate(tokan_name, token_value, site_id, server_url):
     
     return tableau_auth, server
 
-def refresh_views(server,workbook_name):
-    req_option = TSC.RequestOptions()
-    req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
-                                 TSC.RequestOptions.Operator.Equals,
-                                 workbook_name))
-    fetched_workbook, _ = server.workbooks.get(
-        req_options = req_option
-    )
-    server.workbooks.populate_views(fetched_workbook[0])
-    # _server.workbooks.populate_preview_image(fetched_workbook[0])
-    return fetched_workbook[0].views
+# def refresh_views(server,workbook_name):
+#     req_option = TSC.RequestOptions()
+#     req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
+#                                  TSC.RequestOptions.Operator.Equals,
+#                                  workbook_name))
+#     fetched_workbook, _ = server.workbooks.get(
+#         req_options = req_option
+#     )
+#     server.workbooks.populate_views(fetched_workbook[0])
+#     # _server.workbooks.populate_preview_image(fetched_workbook[0])
+#     return fetched_workbook[0].views
 
 @st.cache_data
 def fetchViews(_server, workbook_name):
+    """Fetches all views of a workbook from server
+
+    Args:
+        _server (Tableau Server object): The server object that is used to connect and fetch views.
+        workbook_name (string): The name of the selected workbook.
+
+    Returns:
+        List: list containing all 'Views' objects. The Views object comes from Tableau server. (https://tableau.github.io/server-client-python/docs/api-ref#views)
+    """
     req_option = TSC.RequestOptions()
     req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
                                  TSC.RequestOptions.Operator.Equals,
@@ -52,33 +60,28 @@ def fetchViews(_server, workbook_name):
         req_options = req_option
     )
     _server.workbooks.populate_views(fetched_workbook[0])
-    # _server.workbooks.populate_preview_image(fetched_workbook[0])
+    
     return fetched_workbook[0].views
 
-def download_zip(zip_buffer, download_filename):        
-    try:
-        # some strings <-> bytes conversions necessary here
-        b64 = base64.b64encode(zip_buffer.encode()).decode()
-
-    except AttributeError as e:
-        b64 = base64.b64encode(zip_buffer).decode()
-            
-        dl_link = f"""
-                    <html>
-                    <head>
-                    <title>Start Auto Download file</title>
-                    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-                    <script>
-                    $('<a href="data:text/csv;base64,{b64}" download="{download_filename}">')[0].click()
-                    </script>
-                    </head>
-                    </html>
-                    """
-    
-    return dl_link
-
-# @st.cache_data
 def create_zip(final_views, filters, include_filter_image, filename):
+    """Fetches images from Tableau Server and sends it to download_zip() to download.
+        The loop runs over final_views dictionary in which following tasks are achieved:
+        
+        1. Image is downloaded from server using populate_image()
+        2. filename for that particular image is created
+        3. Additional checks are done to see if there is preprocessing required or filter image should be downloaded
+        4. Image is added to zipwriter.
+
+    Args:
+        final_views (dict): a dictionary containing the keys as index integers (1,2,3,...)
+                            and values as Views object. This Views object comes from Tableau's
+                            Python API and is used for downloading images from server.
+        filters (list): this list contains ImageRequestObject object, which comes from Tableau's 
+                        Python API. This object is used to filter the image that is being downloaded
+                        from the server.
+        include_filter_image (boolean): if boolean is true, then include the filter part of the view.
+        filename (str): filename for the zip file is created with joining the values of common filters with underscore.
+    """
     zip_buffer = io.BytesIO()
     
     tableau_auth, server = authenticate(
@@ -111,7 +114,38 @@ def create_zip(final_views, filters, include_filter_image, filename):
         height=0
     )
     st.session_state.stage = 2
-    # return zip_buffer
+
+def download_zip(zip_buffer, download_filename):
+    """Take the zipwriter prepared from create_zip() function and download the file.
+
+    Args:
+        zip_buffer (zipfile.ZipFile object): Zipwriter object
+        download_filename (str): the filename of zip file being downloaded
+
+    Returns:
+        str: Download link to be sent to create_zip() function
+    """    """"""
+    try:
+        # some strings <-> bytes conversions necessary here
+        b64 = base64.b64encode(zip_buffer.encode()).decode()
+
+    except AttributeError as e:
+        b64 = base64.b64encode(zip_buffer).decode()
+            
+        dl_link = f"""
+                    <html>
+                    <head>
+                    <title>Start Auto Download file</title>
+                    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+                    <script>
+                    $('<a href="data:text/csv;base64,{b64}" download="{download_filename}">')[0].click()
+                    </script>
+                    </head>
+                    </html>
+                    """
+    
+    return dl_link
+
     
 def get_filters(server_url, token_name, token_value, site_name, site_id, api_version="3.22"):
     filter_output = {}
@@ -166,9 +200,9 @@ def crop_image(image,crop_coords,preprocess,**kwargs):
 def set_state(i):
     st.session_state.stage = i
     
-def set_workbook(workbook, stage):
-    st.session_state.workbook = workbook
-    st.session_state.stage = stage
+# def set_workbook(workbook, stage):
+#     st.session_state.workbook = workbook
+#     st.session_state.stage = stage
     
 def save_pref(pref_name, include_filter_image):
     pref_file = Path("preferences.pkl")

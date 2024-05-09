@@ -1,7 +1,11 @@
 import re
 from PIL import Image
 
-# Dict of all possible filters
+''' 
+    Dict of all common filters.
+    The Player Name filter fetches values from a view. Rest all have pre defined values.
+    The filter_field_name is the column in Dashboard used to filter values.
+'''
 filter_dict = {
     "Player Name": {
         "get_values_from_view_id": "6b5e8a50-4e87-42c8-8a19-0cd0419f1e97",
@@ -21,9 +25,18 @@ filter_dict = {
         "is_required": False,
         "filter_field_name": "opponent_handedness",
         "has_default": False
+    },
+    "Year From": {
+        "values": ["2020","2021","2022","2023","2024"],
+        "is_required": False,
+        "filter_field_name": "event_year (copy)",
+        "has_default": False
     }
 }
 
+''' 
+    Dict of all view-specific filters.
+'''
 iteration_filter_dict = {
     "Shot Selection": {
         "values":["Stroke - Include VolleyOverheads","Backhand","Backhand Drive Volley","Backhand Overhead","Backhand Volley","Forehand","Forehand Drive Volley","Forehand Overhead","Forehand Volley","Serve","UNKNOWN","UNKNOWN Drive Volley","UNKNOWN Overhead","UNKNOWN Volley"]
@@ -45,20 +58,20 @@ iteration_filter_dict = {
     }
 }
 
-    # "Select Surface": {
-    #     "values": ["All","Clay","Grass","Hard"],
-    #     "filter_field_name": "surface",
-    #     "is_required": False
-    # }
-    
-    # iterations = {
-    #     1:["Stroke - Include VolleyOverheads,Forehand"],
-    #     2:["Stroke - Include VolleyOverheads,Backhand"],
-    #     3:["Stroke - Include VolleyOverheads,Forehand","Is Inside Baseline?,TRUE"],
-    #     4:["Stroke - Include VolleyOverheads,Backhand","Is Inside Baseline?,TRUE"]
-    # }
-
 class TableauView:
+    ''' 
+        There is a TableauView object for each view. If a newly added view does not have an associated TableauView
+        object, then refer to technical document to see how to create a TableauView object.
+        
+        Attributes:
+        no_of_images: Number of images to download per iteration. This number must match with the number of crop coordinates.
+        crop_coords: crop coordinates in the format: (left top x, left top y, bottom right x, bottom right y) in pixels.
+        preprocess: One view requires some preprocessing before downloading. A portion of image must be covered with plain white color.
+        img2: The image with which preprocessing should be done. Generally it is a plain white image to cover a portion.
+        paste_coords: The coordinate location where the img2 should be pasted on top of the original image.
+        iteration_filters: view-specific filter that a view has.
+        exclude_common_filters: to exclude a common filter
+    '''
     def __init__(self, no_of_images, crop_coords, **kwargs):
         self.no_of_images = no_of_images
         self.crop_coords = crop_coords
@@ -158,6 +171,10 @@ fh_backhand_detailed_tables_obj = TableauView(
 # x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=
 
 class RegexDict(dict):
+    ''' 
+        A dictionary like class that takes a regular expression as an input.
+        The regular expression matches with a specific view name and returns the corresponding TableauView object.
+    '''
     def __init__(self):
         super(RegexDict, self).__init__()
         
@@ -167,6 +184,7 @@ class RegexDict(dict):
                 return v
         return None
 
+# note the regular expressions and the corresponding TableauView object
 view_name_patterns = RegexDict()
 view_name_patterns[r"(?i)serve view \(first"]  = serve_view_obj
 view_name_patterns[r"(?i)serve view \(second"]  = serve_view_obj
