@@ -38,9 +38,9 @@ with st.form(key="download_page_form", border=False):
                 filter_name = list(view_obj.iteration_filters.keys())[i-1]
                 cols[i].markdown(f"**{filter_name}**")
                 for j in range(1, st.session_state.iterations[view.name]+1):
-                    ''' The options parameter is what user sees as the options.
-                        For each view specific filter, the options are loaded from a dictionary created in constants.py.    
-                    '''
+                    #  The options parameter is what user sees as the options.
+                    #  For each view specific filter, the options are loaded from a dictionary created in constants.py.    
+                    
                     cols[i].selectbox(label=" ",key=f"{view.name}_{filter_name}_iter_{j}", options=iteration_filter_dict[filter_name]["values"], index=None, format_func=lambda x:"(NULL)" if x == False else x, placeholder="All")   
         else:
             cols[1].markdown("**No Additional Filters**")
@@ -73,9 +73,9 @@ if download_button:
                     current_iteration_filters.append(f"{filter_field},{filter_value}")
                 if common_filters: # add common filters
                     for cf in common_filters:
-                        ''' For some view, a common filter might not be applicable.
-                            This information is stored in view_obj (TableauView object of that view)
-                        '''
+                        # For some view, a common filter might not be applicable.
+                        # This information is stored in view_obj (TableauView object of that view)
+                        
                         if view_obj.exclude_common_filters and cf[0] in view_obj.exclude_common_filters:
                             continue
                         else:
