@@ -11,8 +11,8 @@ selected_rows = [view_d["View"] for view_d in st.session_state.views_df if view_
 selected_views = [v for v in st.session_state.views if v.name in selected_rows]
 
 if 'iterations' not in st.session_state:
-    ''' st.session_state.iterations stores the info 
-        about how many iterations user selects for each selected view. '''
+    # st.session_state.iterations stores the info 
+    # about how many iterations user selects for each selected view. 
     st.session_state.iterations = {} 
 
 with st.form(key="iteration_page_form", border=False):

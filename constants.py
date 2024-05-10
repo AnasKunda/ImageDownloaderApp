@@ -29,7 +29,7 @@ filter_dict = {
     "Year From": {
         "values": ["2020","2021","2022","2023","2024"],
         "is_required": False,
-        "filter_field_name": "event_year (copy)",
+        "filter_field_name": "event_year_param",
         "has_default": False
     }
 }
@@ -82,9 +82,12 @@ class TableauView:
         self.exclude_common_filters = kwargs.get('exclude_common_filters', None)
         
 serve_view_obj = TableauView(
-    no_of_images=3,
-    crop_coords=[(0,0,774,746),(0,746,1006,886),(773,7,1022,696)]
+    no_of_images=1,
+    crop_coords=[(0,0,1022,886)]
 )
+
+# no_of_images=3,
+#     crop_coords=[(0,0,774,746),(0,746,1006,886),(773,7,1022,696)]
 
 serve_view_heat_map_obj = TableauView(
     no_of_images=3,
