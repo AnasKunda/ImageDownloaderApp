@@ -1,11 +1,11 @@
 import re
 from PIL import Image
 
-''' 
-    Dict of all common filters.
-    The Player Name filter fetches values from a view. Rest all have pre defined values.
-    The filter_field_name is the column in Dashboard used to filter values.
-'''
+
+# Dict of all common filters.
+# The Player Name filter fetches values from a view. Rest all have pre defined values.
+# The filter_field_name is the column in Dashboard used to filter values.
+    
 filter_dict = {
     "Player Name": {
         "get_values_from_view_id": "6b5e8a50-4e87-42c8-8a19-0cd0419f1e97",
@@ -34,9 +34,9 @@ filter_dict = {
     }
 }
 
-''' 
-    Dict of all view-specific filters.
-'''
+ 
+# Dict of all view-specific filters.
+
 iteration_filter_dict = {
     "Shot Selection": {
         "values":["Stroke - Include VolleyOverheads","Backhand","Backhand Drive Volley","Backhand Overhead","Backhand Volley","Forehand","Forehand Drive Volley","Forehand Overhead","Forehand Volley","Serve","UNKNOWN","UNKNOWN Drive Volley","UNKNOWN Overhead","UNKNOWN Volley"]
@@ -82,12 +82,9 @@ class TableauView:
         self.exclude_common_filters = kwargs.get('exclude_common_filters', None)
         
 serve_view_obj = TableauView(
-    no_of_images=1,
-    crop_coords=[(0,0,1022,886)]
+    no_of_images=3,
+    crop_coords=[(0,0,774,746),(0,746,1006,886),(773,7,1022,696)]
 )
-
-# no_of_images=3,
-#     crop_coords=[(0,0,774,746),(0,746,1006,886),(773,7,1022,696)]
 
 serve_view_heat_map_obj = TableauView(
     no_of_images=3,
