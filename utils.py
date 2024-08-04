@@ -10,6 +10,19 @@ from constants import *
 from PIL import Image, ImageFile
 from pathlib import Path
 import pandas as pd
+import time
+from functools import wraps
+
+def timeit(func):
+    @wraps(func)
+    def timeit_wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        total_time = end_time - start_time
+        print(f'Function {func.__name__} Took {total_time:.4f} seconds')
+        return result
+    return timeit_wrapper
 
 def authenticate(tokan_name, token_value, site_id, server_url):
     """Connect to Tableau server using Personal Access Token
@@ -93,18 +106,27 @@ def create_zip(final_views, filters, include_filter_image, filename):
     with server.auth.sign_in(tableau_auth):
         with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as my_zip:
             for i,v in final_views.items():
+
                 server.views.populate_image(v, filters[i])
+
+                start_time = time.perf_counter()
                 filter_name = '__'.join(['_'.join(filter_pair).replace(" ","") for filter_pair in filters[i].view_filters])
+                end_time = time.perf_counter()
+                print(f"View: {v.name}\tTime for filter_name list: {end_time-start_time}")
                 view_obj = view_name_patterns[v.name]
+                print(f"View: {v.name},\tcrop_coords: {view_obj.crop_coords}", end="\n\n\n")
                 if view_obj:
                     preprocess = True if view_obj.preprocess else False
                     if include_filter_image:
                         no_of_images = view_obj.no_of_images
                     else:
-                        no_of_images = view_obj.no_of_images - 1
+                        no_of_images = max(1,view_obj.no_of_images - 1)
                     for j in range(no_of_images):
-                        image_io = crop_image(v.image,view_obj.crop_coords[j],preprocess,paste_coords=view_obj.paste_coords,img2=view_obj.img2)
+                        image_io = crop_image(v.image,preprocess,view_obj.crop_coords[j],paste_coords=view_obj.paste_coords,img2=view_obj.img2)
+                        start_time = time.perf_counter()
                         my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}__{filter_name}__crop_{j+1}.png",data=image_io.getvalue())
+                        end_time = time.perf_counter()
+                        print(f"View: {v.name}\tTime for myzip write: {end_time-start_time}", end="\n\n\n")
                 else:
                     image_io = io.BytesIO(v.image)
                     my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}.png",data=image_io.getvalue())
@@ -115,6 +137,7 @@ def create_zip(final_views, filters, include_filter_image, filename):
     )
     st.session_state.stage = 2
 
+@timeit
 def download_zip(zip_buffer, download_filename):
     """Take the zipwriter prepared from create_zip() function and download the file.
 
@@ -146,8 +169,8 @@ def download_zip(zip_buffer, download_filename):
     
     return dl_link
 
-    
-def get_filters(server_url, token_name, token_value, site_name, site_id, api_version="3.22"):
+@timeit    
+def get_filters(server_url, token_name, token_value, site_name, site_id, api_version="3.23"):
     filter_output = {}
     tableau_server_config = {
             'my_env': {
@@ -173,13 +196,15 @@ def get_filters(server_url, token_name, token_value, site_name, site_id, api_ver
     conn.sign_out()
     return filter_output
 
-def crop_image(image,crop_coords,preprocess,**kwargs):
+@timeit
+def crop_image(image,preprocess,crop_coords=None,**kwargs):
     p = ImageFile.Parser()
     p.feed(image)
     image = p.close()
     if preprocess:
         image.paste(kwargs['img2'], kwargs['paste_coords'])
-    image = image.crop(crop_coords)
+    if crop_coords:
+        image = image.crop(crop_coords)
     image_io = io.BytesIO()
     image.save(image_io, 'PNG')
     return image_io
@@ -251,7 +276,7 @@ def create_zip_from_pref(pref_name):
     pref_row = pref_row.loc[pref_row.pref_name == pref_name]
     # common_filters = pref_row.common_filters.values[0]
     common_filters = st.session_state.selected_filter_value
-    print(f"common_filters: {common_filters}")
+    # print(f"common_filters: {common_filters}")
     iterations = pref_row.iterations.values[0]
     iteration_details = pref_row.iteration_details.values[0]
     include_filter_image = pref_row.include_filter_image.values[0]
@@ -264,7 +289,7 @@ def create_zip_from_pref(pref_name):
         view_obj = view_name_patterns[v.name]
         v_iteration = iterations[v.name]
         view_iteration_filters = iteration_details[v.name]
-        print(f"view_iteration_filters: {view_iteration_filters}")
+        # print(f"view_iteration_filters: {view_iteration_filters}")
         
         for i in range(1,v_iteration+1):
             image_request_object = TSC.ImageRequestOptions()
@@ -277,13 +302,13 @@ def create_zip_from_pref(pref_name):
                     if view_obj.exclude_common_filters and cf.split(':')[0] in view_obj.exclude_common_filters:
                         continue
                     else:
-                        print(f"Filter: {cf.split(':')[0]},{cf.split(':')[1]}")
+                        # print(f"Filter: {cf.split(':')[0]},{cf.split(':')[1]}")
                         image_request_object.vf(cf.split(':')[0],cf.split(':')[1])  
                 
             # ITERATION SPECIFIC FILTERS
             if current_iteration_filters:
                 for i_f in current_iteration_filters: # add iteration-specific filters
-                    print(f"Filter: {i_f}")
+                    # print(f"Filter: {i_f}")
                     image_request_object.vf(i_f.split(",")[0],i_f.split(",")[1]) 
                 
             final_views[len(final_views)+1] = v 

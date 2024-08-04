@@ -83,7 +83,12 @@ class TableauView:
         
 serve_view_obj = TableauView(
     no_of_images=3,
-    crop_coords=[(0,0,774,746),(0,746,1006,886),(773,7,1022,696)]
+    crop_coords=[(0,0,774,766),(0,766,1006,886),(773,7,1022,696)]
+)
+
+s_1_r_1_obj = TableauView(
+    no_of_images=2,
+    crop_coords=[(0,0,626,571),(951,0,1167,276)]
 )
 
 serve_view_heat_map_obj = TableauView(
@@ -94,6 +99,11 @@ serve_view_heat_map_obj = TableauView(
 return_view_obj = TableauView(
     no_of_images=3,
     crop_coords=[(0,0,774,746),(0,746,1006,886),(773,7,1022,696)]
+)
+
+return_view_v2_obj = TableauView(
+    no_of_images=2,
+    crop_coords=[(0,0,772,900),(773,0,1022,900)]
 )
 
 return_view_heat_map_obj = TableauView(
@@ -116,7 +126,7 @@ ground_stroke_bar_chart_obj = TableauView(
 
 ground_stroke_with_kpi_card_obj = TableauView(
     no_of_images=2,
-    crop_coords=[(0, 52, 1467, 825), (0, 0, 1467, 52)],
+    crop_coords=[(0, 52, 1467, 825), (0, 0, 1468, 52)],
     iteration_filters = {"Hit from Mid section?":"Hit from Mid section?"}
 )
 
@@ -139,6 +149,11 @@ serve_plus_1_obj = TableauView(
     no_of_images=2,
     crop_coords=[(0, 0, 781, 899), (781, 0, 1023, 899)],
     iteration_filters = {"Service Side":"court_side", "Which Serve":"WhichServe"}
+)
+
+serve_plus_1_heatmap_obj = TableauView(
+    no_of_images=4,
+    crop_coords=[(0,0,784,567),(0,568,784,615),(0,616,836,900),(785,0,1025,684)]
 )
 
 return_plus_1_obj = TableauView(
@@ -168,6 +183,36 @@ fh_backhand_detailed_tables_obj = TableauView(
     exclude_common_filters = ["surface", "opponent_handedness"]
 )
 
+when_opponent_at_the_end_obj = TableauView(
+    no_of_images=2,
+    crop_coords=[(0,0,829,800),(830,0,1000,800)]
+)
+
+vs_slice_obj = TableauView(
+    no_of_images=2,
+    crop_coords=[(0,0,768,707),(769,0,1000,202)]
+)
+
+fluctuation_global_obj = TableauView(
+    no_of_images=1,
+    crop_coords=[(0,0,1500,1040)]
+)
+
+cizr_fluctuations_obj = TableauView(
+    no_of_images=2,
+    crop_coords=[(0,120,1468,959),(1238,0,1468,120)]
+)
+
+cizr_opp_fluctuations_obj = TableauView(
+    no_of_images=2,
+    crop_coords=[(0,126,1466,902),(1256,0,1466,126)]
+)
+
+tour_averages_obj = TableauView(
+    no_of_images=2,
+    crop_coords=[(0,70,400,1126),(0,0,150,70)]
+)
+
 # x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=x=
 
 class RegexDict(dict):
@@ -183,6 +228,12 @@ class RegexDict(dict):
             if re.match(k, item):
                 return v
         return None
+    
+    def get(self, item, default):
+        for k,v in self.items():
+            if re.match(k, item):
+                return v
+        return default
 
 # note the regular expressions and the corresponding TableauView object
 view_name_patterns = RegexDict()
@@ -191,16 +242,26 @@ view_name_patterns[r"(?i)serve view \(second"]  = serve_view_obj
 view_name_patterns[r"(?i)serve view \(heat map\)"] = serve_view_heat_map_obj
 view_name_patterns[r"(?i)serve view"]  = serve_view_obj
 view_name_patterns[r"(?i)return view \(heat map\)"] = return_view_heat_map_obj
+view_name_patterns[r"(?i)return view \(v[2,3]\).*"] = return_view_v2_obj
 view_name_patterns[r"(?i)return view"] = return_view_obj
 view_name_patterns[r"(?i)ground stroke full court view"] = ground_stroke_view_obj
 view_name_patterns[r"(?i)ground stroke heat map view \(.*"] = ground_stroke_view_obj
 view_name_patterns[r"(?i)ground strokes with shot type bar chart.*"] = ground_stroke_bar_chart_obj
-view_name_patterns[r"(?i)ground stroke with kpi cards \(2\)"] = ground_stroke_with_kpi_card_2_obj
-view_name_patterns[r"(?i)ground stroke with kpi cards"] = ground_stroke_with_kpi_card_obj
+view_name_patterns[r"(?i)ground stroke with kpi cards \(2\).*"] = ground_stroke_with_kpi_card_2_obj
+view_name_patterns[r"(?i)ground stroke with kpi cards v3.*"] = ground_stroke_with_kpi_card_2_obj
+view_name_patterns[r"(?i)ground stroke with kpi cards.*"] = ground_stroke_with_kpi_card_obj
 view_name_patterns[r"(?i)winners and errors heatmap.*"] = winners_and_errors_heatmap_obj
+view_name_patterns[r"(?i)serve \+1 \(heat map\)"] = serve_plus_1_obj
 view_name_patterns[r"(?i)serve \+1.*"] = serve_plus_1_obj
 view_name_patterns[r"(?i)return \+1.*"] = return_plus_1_obj
 view_name_patterns[r"(?i)game scenarios.*"] = game_scenarios_obj
 view_name_patterns[r"(?i)stroke speed & spin over time.*"] = stroke_speed_and_spin_obj
 view_name_patterns[r"(?i)ppc-npc.*"] = ppc_npc_obj
 view_name_patterns[r"(?i)fh and backhand detailed tables.*"] = fh_backhand_detailed_tables_obj
+view_name_patterns[r"(?i)[s,r]\+1 based on.*"] = s_1_r_1_obj
+view_name_patterns[r"(?i)when opponent at.*"] = when_opponent_at_the_end_obj
+view_name_patterns[r"(?i)vs slice.*"] = vs_slice_obj
+view_name_patterns[r"(?i)fluctuations global.*"] = fluctuation_global_obj
+view_name_patterns[r"(?i)cizr fluctuations.*"] = cizr_fluctuations_obj
+view_name_patterns[r"(?i)cizr opp fluctuations.*"] = cizr_opp_fluctuations_obj
+view_name_patterns[r"(?i)tour averages by rankings.*"] = tour_averages_obj

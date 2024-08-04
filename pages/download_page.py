@@ -1,7 +1,7 @@
 import streamlit as st
-from constants import view_name_patterns, filter_dict, iteration_filter_dict
+from constants import view_name_patterns, filter_dict, iteration_filter_dict, TableauView
 import tableauserverclient as TSC
-from utils import create_zip, save_pref
+from utils import create_zip, save_pref, timeit
 
 st.set_page_config(page_title="Download Images", layout="wide")
 st.title("Set Filters & Download")
@@ -22,7 +22,7 @@ iteration_details = {}
 
 with st.form(key="download_page_form", border=False):
     for view in selected_views:
-        view_obj = view_name_patterns[view.name]
+        view_obj = view_name_patterns.get(view.name, TableauView(no_of_images=1, crop_coords=[()]))             #view_name_patterns[view.name]
         container = st.container()
         container.subheader(f"{view.name}")
         
@@ -52,7 +52,7 @@ with st.form(key="download_page_form", border=False):
     
 if download_button:
     for view in selected_views:
-        view_obj = view_name_patterns[view.name]
+        view_obj = view_name_patterns.get(view.name, TableauView(no_of_images=1, crop_coords=[()]))                             #  view_name_patterns[view.name]
         common_filters = [] # stores common filters specific to the view
         iteration_details[view.name] = {} # stores view filters specific to the view
 
@@ -95,7 +95,7 @@ if download_button:
                     if view_obj.exclude_common_filters and cf[0] in view_obj.exclude_common_filters:
                         continue
                     else:
-                        print(f"Filter: {cf[0]},{cf[1]}")
+                        # print(f"Filter: {cf[0]},{cf[1]}")
                         image_request_object.vf(cf[0],cf[1])
                                             
                 final_views[len(final_views)+1] = view
@@ -105,7 +105,7 @@ if download_button:
     # if user has entered a preference name in textbox, then save current setting with that preference name
     if pref_name:
         st.session_state.iteration_details = iteration_details
-        print(f"st.session_state.iterations: {st.session_state.iterations}")
+        # print(f"st.session_state.iterations: {st.session_state.iterations}")
         save_pref(pref_name, include_filter_image)
     # create a filename based on common filters
     filename = ""
