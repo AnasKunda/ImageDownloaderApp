@@ -76,6 +76,7 @@ def fetchViews(_server, workbook_name):
     
     return fetched_workbook[0].views
 
+@timeit
 def create_zip(final_views, filters, include_filter_image, filename):
     """Fetches images from Tableau Server and sends it to download_zip() to download.
         The loop runs over final_views dictionary in which following tasks are achieved:
@@ -109,12 +110,13 @@ def create_zip(final_views, filters, include_filter_image, filename):
 
                 server.views.populate_image(v, filters[i])
 
-                start_time = time.perf_counter()
                 filter_name = '__'.join(['_'.join(filter_pair).replace(" ","") for filter_pair in filters[i].view_filters])
-                end_time = time.perf_counter()
-                print(f"View: {v.name}\tTime for filter_name list: {end_time-start_time}")
+                start_time_2 = time.perf_counter()
                 view_obj = view_name_patterns[v.name]
-                print(f"View: {v.name},\tcrop_coords: {view_obj.crop_coords}", end="\n\n\n")
+                end_time_2 = time.perf_counter()
+                
+                print(f"View: {v.name}\tTime for view_name_patterns search: {end_time_2 - start_time_2}")
+
                 if view_obj:
                     preprocess = True if view_obj.preprocess else False
                     if include_filter_image:
@@ -123,10 +125,8 @@ def create_zip(final_views, filters, include_filter_image, filename):
                         no_of_images = max(1,view_obj.no_of_images - 1)
                     for j in range(no_of_images):
                         image_io = crop_image(v.image,preprocess,view_obj.crop_coords[j],paste_coords=view_obj.paste_coords,img2=view_obj.img2)
-                        start_time = time.perf_counter()
                         my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}__{filter_name}__crop_{j+1}.png",data=image_io.getvalue())
-                        end_time = time.perf_counter()
-                        print(f"View: {v.name}\tTime for myzip write: {end_time-start_time}", end="\n\n\n")
+
                 else:
                     image_io = io.BytesIO(v.image)
                     my_zip.writestr(zinfo_or_arcname=f"{v.name.replace(' ','_')}.png",data=image_io.getvalue())

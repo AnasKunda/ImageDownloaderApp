@@ -2,6 +2,7 @@ import streamlit as st
 from constants import view_name_patterns, filter_dict, iteration_filter_dict, TableauView
 import tableauserverclient as TSC
 from utils import create_zip, save_pref, timeit
+import time
 
 st.set_page_config(page_title="Download Images", layout="wide")
 st.title("Set Filters & Download")

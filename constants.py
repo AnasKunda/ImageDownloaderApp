@@ -55,6 +55,12 @@ iteration_filter_dict = {
     },
     "Hit from Mid section?": {
         "values":["TRUE","FALSE"]
+    },
+    "Stroke": {
+        "values":["Backhand","Forehand","Serve"]
+    },
+    "Zones": {
+        "values":["Zone 1","Zone 2","Zone 3","Zone 4","Zone 5",]
     }
 }
 
@@ -127,13 +133,14 @@ ground_stroke_bar_chart_obj = TableauView(
 ground_stroke_with_kpi_card_obj = TableauView(
     no_of_images=2,
     crop_coords=[(0, 52, 1467, 825), (0, 0, 1468, 52)],
-    iteration_filters = {"Hit from Mid section?":"Hit from Mid section?"}
+    iteration_filters = {"Hit from Mid section?":"Hit from Mid section?",\
+                        "Zones":"Zones"}
 )
 
 ground_stroke_with_kpi_card_2_obj = TableauView(
     no_of_images=2,
     crop_coords=[(0, 52, 1468, 826), (0, 0, 1468, 52)],
-    iteration_filters = {"Shot Selection":"Stroke - Include VolleyOverheads",\
+    iteration_filters = {"Stroke":"stroke",\
                         "Is Inside Baseline":"Is Inside Baseline?",\
                         "Forehand hit from Backhand Corner":"Forehand hit from Backhand Corner"},
     exclude_common_filters = ["surface"]
@@ -240,6 +247,7 @@ view_name_patterns = RegexDict()
 view_name_patterns[r"(?i)serve view \(first"]  = serve_view_obj
 view_name_patterns[r"(?i)serve view \(second"]  = serve_view_obj
 view_name_patterns[r"(?i)serve view \(heat map\)"] = serve_view_heat_map_obj
+view_name_patterns[r"(?i)serve view heatmap\(with tour avgs\)"] = serve_view_heat_map_obj
 view_name_patterns[r"(?i)serve view"]  = serve_view_obj
 view_name_patterns[r"(?i)return view \(heat map\)"] = return_view_heat_map_obj
 view_name_patterns[r"(?i)return view \(v[2,3]\).*"] = return_view_v2_obj
