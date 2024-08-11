@@ -108,17 +108,6 @@ def main():
                 st.subheader('Go to Next Page')
                 submit_button = st.form_submit_button(label="Next")
       
-            
-        if submit_button:
-            st.session_state.views = views
-            st.session_state.views_df = views_df
-            if not preference:
-                # if no preference is selected, the flow will go to iterations page to select iterations.
-                # otherwise, it will download images from the saved preferences.
-                st.switch_page("pages/iteration_page.py")
-            else:
-                create_zip_from_pref(preference)
-                
         with st.form(key='delete preference', border=False):
             col_1, col_2, col_3 = st.columns(3)
             
@@ -127,13 +116,20 @@ def main():
                 del_pref_names = load_pref()
                 del_preference = st.selectbox(label="", key="del_pref_select", options=del_pref_names, index=None)
                 del_submit_button = st.form_submit_button(label="Delete Preference")
-                
+        
         if del_submit_button:
             status = delete_pref(pref_name=del_preference)
             st.rerun()
-            
-                
-    
-    
+        
+        if submit_button:
+            st.session_state.views = views
+            st.session_state.views_df = views_df
+            if not preference:  
+                # if no preference is selected, the flow will go to iterations page to select iterations.
+                # otherwise, it will download images from the saved preferences.
+                st.switch_page("pages/iteration_page.py")
+            else:
+                create_zip_from_pref(preference)
+                 
 if __name__ == '__main__':
     main()
