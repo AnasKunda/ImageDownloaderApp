@@ -104,7 +104,7 @@ def main():
             with col3:
                 st.subheader('Load from Preferences')
                 pref_names = load_pref()
-                preference = st.selectbox(label="", key="pref_select", options=pref_names, index=None)
+                preference = st.selectbox(label="select preferences", key="pref_select", options=pref_names, index=None, label_visibility="hidden")
                 st.subheader('Go to Next Page')
                 submit_button = st.form_submit_button(label="Next")
       
@@ -114,7 +114,7 @@ def main():
             with col_1:
                 st.subheader('Delete Preference')
                 del_pref_names = load_pref()
-                del_preference = st.selectbox(label="", key="del_pref_select", options=del_pref_names, index=None)
+                del_preference = st.selectbox(label="Select preferences", key="del_pref_select", options=del_pref_names, index=None, label_visibility="hidden")
                 del_submit_button = st.form_submit_button(label="Delete Preference")
         
         if del_submit_button:

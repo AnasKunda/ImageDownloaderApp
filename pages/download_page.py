@@ -31,7 +31,7 @@ with st.form(key="download_page_form", border=False):
         
         cols[0].markdown("**Iteration**")
         for i in range(1,st.session_state.iterations[view.name]+1):
-            cols[0].selectbox(label=" ", key=f"{view.name}_iter_{i}", options=[i])
+            cols[0].selectbox(label=" ", key=f"{view.name}_iter_{i}", options=[i], label_visibility="hidden")
         
         # if there are any view specific filters
         if view_obj.iteration_filters:
@@ -42,7 +42,7 @@ with st.form(key="download_page_form", border=False):
                     #  The options parameter is what user sees as the options.
                     #  For each view specific filter, the options are loaded from a dictionary created in constants.py.    
                     
-                    cols[i].selectbox(label=" ",key=f"{view.name}_{filter_name}_iter_{j}", options=iteration_filter_dict[filter_name]["values"], index=None, format_func=lambda x:"(NULL)" if x == False else x, placeholder="All")   
+                    cols[i].selectbox(label=" ",key=f"{view.name}_{filter_name}_iter_{j}", options=iteration_filter_dict[filter_name]["values"], index=None, format_func=lambda x:"(NULL)" if x == False else x, placeholder="All", label_visibility="hidden")   
         else:
             cols[1].markdown("**No Additional Filters**")
 

@@ -9,7 +9,7 @@ a2_2.title("Enter Password")
 
 container2 = st.container(border=None)
 _, b2, _ = container2.columns(3)
-pss = b2.text_input(label="", type="password")
+pss = b2.text_input(label="Enter password", type="password", label_visibility="hidden")
 
 container3 = st.container(border=None)
 _, c2, _ = container3.columns(3)
