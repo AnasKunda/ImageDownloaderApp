@@ -270,6 +270,22 @@ def load_pref():
     else:
         pref_names = pd.read_pickle('preferences.pkl')['pref_name'].to_list()
         return pref_names
+    
+def delete_pref(pref_name):
+    pref_file = Path("preferences.pkl")
+    
+    try:
+        _ = pref_file.resolve(strict=True)
+        
+    except FileNotFoundError:
+        return 0
+    
+    else:
+        pref_df = pd.read_pickle('preferences.pkl')
+        pref_df.drop(pref_df.loc[pref_df['pref_name']==pref_name].index,inplace=True)
+        pref_df.to_pickle('preferences.pkl')
+        return 1
+        
         
 def create_zip_from_pref(pref_name):
     pref_row = pd.read_pickle('preferences.pkl')

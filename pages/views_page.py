@@ -117,7 +117,21 @@ def main():
                 # otherwise, it will download images from the saved preferences.
                 st.switch_page("pages/iteration_page.py")
             else:
-                create_zip_from_pref(preference)        
+                create_zip_from_pref(preference)
+                
+        with st.form(key='delete preference', border=False):
+            col_1, col_2, col_3 = st.columns(3)
+            
+            with col_1:
+                st.subheader('Delete Preference')
+                del_pref_names = load_pref()
+                del_preference = st.selectbox(label="", key="del_pref_select", options=del_pref_names, index=None)
+                del_submit_button = st.form_submit_button(label="Delete Preference", on_click=delete_pref, args=(del_preference,))
+                
+        if del_submit_button:
+            st.rerun()
+            
+                
     
     
 if __name__ == '__main__':
