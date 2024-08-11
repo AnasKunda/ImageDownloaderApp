@@ -126,9 +126,10 @@ def main():
                 st.subheader('Delete Preference')
                 del_pref_names = load_pref()
                 del_preference = st.selectbox(label="", key="del_pref_select", options=del_pref_names, index=None)
-                del_submit_button = st.form_submit_button(label="Delete Preference", on_click=delete_pref, args=(del_preference,))
+                del_submit_button = st.form_submit_button(label="Delete Preference")
                 
         if del_submit_button:
+            status = delete_pref(pref_name=del_preference)
             st.rerun()
             
                 
